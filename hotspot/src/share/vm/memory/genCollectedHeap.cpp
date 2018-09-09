@@ -695,6 +695,7 @@ gen_process_strong_roots(int level,
                          OopsInGenClosure* older_gens) {
   // General strong roots.
 
+  GCTraceTime t("SharedHeap::process_strong_roots",PrintGCDetails,true,NULL)
   if (!do_code_roots) {
     SharedHeap::process_strong_roots(activate_scope, collecting_perm_gen, so,
                                      not_older_gens, NULL, older_gens);
