@@ -185,10 +185,10 @@ void SharedHeap::process_strong_roots(bool activate_scope,
 
   if (!_process_strong_tasks->is_task_claimed(SH_PS_SystemDictionary_oops_do)) {
     if (so & SO_AllClasses) {
-      GCTraceTime t("SystemDictionary_OOPS_DO",PrintGCDetails,true,NULL);
+      GCTraceTime t("SystemDictionary_OOPS_DO",true,true,NULL);
       SystemDictionary::oops_do(roots);
     } else if (so & SO_SystemClasses) {
-      GCTraceTime t("SystemDictionary_ALWAYS_STRONG_OOPS_DO",PrintGCDetails,true,NULL);
+      GCTraceTime t("SystemDictionary_ALWAYS_STRONG_OOPS_DO",true,true,NULL);
       SystemDictionary::always_strong_oops_do(roots);
     }
   }
@@ -197,10 +197,10 @@ void SharedHeap::process_strong_roots(bool activate_scope,
   // from the StringTable are the individual tasks.
   if (so & SO_Strings || (!collecting_perm_gen && !JavaObjectsInPerm)) {
     if (CollectedHeap::use_parallel_gc_threads()) {
-      GCTraceTime t("StringTable_possibly_parallel_oops_do",PrintGCDetails,true,NULL);
+      GCTraceTime t("StringTable_possibly_parallel_oops_do",true,true,NULL);
       StringTable::possibly_parallel_oops_do(roots);
     } else {
-      GCTraceTime t("StringTable_oops_do",PrintGCDetails,true,NULL);
+      GCTraceTime t("StringTable_oops_do",true,true,NULL);
       StringTable::oops_do(roots);
     }
   }
