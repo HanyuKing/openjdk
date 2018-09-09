@@ -34,6 +34,7 @@
 #include "services/management.hpp"
 #include "utilities/copy.hpp"
 #include "utilities/workgroup.hpp"
+#include "gc_implementation/shared/gcTraceTime.hpp"
 
 SharedHeap* SharedHeap::_sh;
 
