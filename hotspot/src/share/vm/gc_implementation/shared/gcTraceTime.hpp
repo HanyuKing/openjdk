@@ -44,9 +44,9 @@ class GCTraceTime {
   ~GCTraceTime();
 
   // return the current system millisecend time
-  long getCurrentTime();
+  static long getCurrentTime();
 
-  void printf_format_time(const char* title, long start_time, long cost_time);
+  static void printf_format_time(const char* title, long start_time, long cost_time);
 };
 
 #endif // SHARE_VM_GC_IMPLEMENTATION_SHARED_GCTRACETIME_HPP
