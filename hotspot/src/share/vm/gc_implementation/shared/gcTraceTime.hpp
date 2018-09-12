@@ -27,6 +27,8 @@
 
 #include "prims/jni_md.h"
 #include "utilities/ticks.hpp"
+#include <sys/time.h>
+#include <stdio.h>
 
 class GCTimer;
 
@@ -40,6 +42,11 @@ class GCTraceTime {
  public:
   GCTraceTime(const char* title, bool doit, bool print_cr, GCTimer* timer);
   ~GCTraceTime();
+
+  // return the current system millisecend time
+  long getCurrentTime();
+
+  printf_format_time(const char* title, long start_time, long cost_time);
 };
 
 #endif // SHARE_VM_GC_IMPLEMENTATION_SHARED_GCTRACETIME_HPP

@@ -22,6 +22,7 @@
  *
  */
 
+#include <stdio.h>
 #include "precompiled.hpp"
 #include "classfile/symbolTable.hpp"
 #include "classfile/systemDictionary.hpp"
@@ -695,7 +696,7 @@ gen_process_strong_roots(int level,
                          OopsInGenClosure* older_gens) {
   // General strong roots.
 
-  GCTraceTime t("SharedHeap::process_strong_roots",true,true,NULL);
+  long start = GCTraceTime::getCurrentTime();
   if (!do_code_roots) {
     SharedHeap::process_strong_roots(activate_scope, collecting_perm_gen, so,
                                      not_older_gens, NULL, older_gens);
@@ -705,6 +706,8 @@ gen_process_strong_roots(int level,
     SharedHeap::process_strong_roots(activate_scope, collecting_perm_gen, so,
                                      not_older_gens, &code_roots, older_gens);
   }
+  long end = GCTraceTime::getCurrentTime();
+  GCTraceTime::printf_format_time("SharedHeap::process_strong_roots", start, end - start);
 
   if (younger_gens_as_roots) {
     if (!_gen_process_strong_tasks->is_task_claimed(GCH_PS_younger_gens)) {

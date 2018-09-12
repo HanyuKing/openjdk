@@ -22,6 +22,7 @@
  *
  */
 
+#include <stdio.h>
 #include "precompiled.hpp"
 #include "classfile/symbolTable.hpp"
 #include "classfile/systemDictionary.hpp"
@@ -186,11 +187,19 @@ void SharedHeap::process_strong_roots(bool activate_scope,
 
   if (!_process_strong_tasks->is_task_claimed(SH_PS_SystemDictionary_oops_do)) {
     if (so & SO_AllClasses) {
-      GCTraceTime t("SystemDictionary_OOPS_DO",true,true,NULL);
+      long start = GCTraceTime::getCurrentTime();
+
       SystemDictionary::oops_do(roots);
+
+      long end = GCTraceTime::getCurrentTime();
+      GCTraceTime::printf_format_time("SystemDictionary::oops_do", start, end - start);
     } else if (so & SO_SystemClasses) {
-      GCTraceTime t("SystemDictionary_ALWAYS_STRONG_OOPS_DO",true,true,NULL);
+      long start = GCTraceTime::getCurrentTime();
+
       SystemDictionary::always_strong_oops_do(roots);
+
+      long end = GCTraceTime::getCurrentTime();
+      GCTraceTime::printf_format_time("SystemDictionary::always_strong_oops_do", start, end - start);
     }
   }
 
@@ -198,11 +207,17 @@ void SharedHeap::process_strong_roots(bool activate_scope,
   // from the StringTable are the individual tasks.
   if (so & SO_Strings || (!collecting_perm_gen && !JavaObjectsInPerm)) {
     if (CollectedHeap::use_parallel_gc_threads()) {
-      GCTraceTime t("StringTable_possibly_parallel_oops_do",true,true,NULL);
+      long start = GCTraceTime::getCurrentTime();
+
       StringTable::possibly_parallel_oops_do(roots);
+
+      long end = GCTraceTime::getCurrentTime();
+      GCTraceTime::printf_format_time("StringTable::possibly_parallel_oops_do", start, end - start);
     } else {
-      GCTraceTime t("StringTable_oops_do",true,true,NULL);
+      long start = GCTraceTime::getCurrentTime();
       StringTable::oops_do(roots);
+      long end = GCTraceTime::getCurrentTime();
+      GCTraceTime::printf_format_time("StringTable::oops_do", start, end - start);
     }
   }
   if (JavaObjectsInPerm) {

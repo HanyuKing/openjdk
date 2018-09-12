@@ -22,6 +22,7 @@
  *
  */
 
+#include <stdio.h>
 #include "precompiled.hpp"
 #include "classfile/dictionary.hpp"
 #include "classfile/javaClasses.hpp"
@@ -54,6 +55,7 @@
 #include "runtime/signature.hpp"
 #include "services/classLoadingService.hpp"
 #include "services/threadService.hpp"
+#include "gc_implementation/shared/gcTraceTime.hpp"
 
 #if INCLUDE_TRACE
  #include "memory/iterator.hpp"
@@ -1689,26 +1691,43 @@ bool SystemDictionary::do_unloading(BoolObjectClosure* is_alive) {
 // a necessary order, shared_oops_do() is call by
 // Universe::oops_do().
 void SystemDictionary::oops_do(OopClosure* f) {
+  long start = GCTraceTime::getCurrentTime();
   // Adjust preloaded classes and system loader object
   f->do_oop(&_java_system_loader);
+  GCTraceTime::printf_format_time("f->do_oop", start, GCTraceTime::getCurrentTime() - start);
+
+  start = GCTraceTime::getCurrentTime();
   preloaded_oops_do(f);
+  GCTraceTime::printf_format_time("preloaded_oops_do", start, GCTraceTime::getCurrentTime() - start);
 
+  start = GCTraceTime::getCurrentTime();
   lazily_loaded_oops_do(f);
+  GCTraceTime::printf_format_time("lazily_loaded_oops_do", start, GCTraceTime::getCurrentTime() - start);
 
+  start = GCTraceTime::getCurrentTime();
   // Adjust dictionary
   dictionary()->oops_do(f);
+  GCTraceTime::printf_format_time("dictionary()->oops_do", start, GCTraceTime::getCurrentTime() - start);
 
+  start = GCTraceTime::getCurrentTime();
   // Visit extra methods
   invoke_method_table()->oops_do(f);
+  GCTraceTime::printf_format_time("invoke_method_table()->oops_do", start, GCTraceTime::getCurrentTime() - start);
 
+  start = GCTraceTime::getCurrentTime();
   // Partially loaded classes
   placeholders()->oops_do(f);
+  GCTraceTime::printf_format_time("placeholders()->oops_do", start, GCTraceTime::getCurrentTime() - start);
 
+  start = GCTraceTime::getCurrentTime();
   // Adjust constraint table
   constraints()->oops_do(f);
+  GCTraceTime::printf_format_time("constraints()->oops_do", start, GCTraceTime::getCurrentTime() - start);
 
+  start = GCTraceTime::getCurrentTime();
   // Adjust resolution error table
   resolution_errors()->oops_do(f);
+  GCTraceTime::printf_format_time("resolution_errors()->oops_do", start, GCTraceTime::getCurrentTime() - start);
 }
 
 
