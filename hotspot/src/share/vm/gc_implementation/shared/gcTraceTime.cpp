@@ -90,13 +90,13 @@ GCTraceTime::~GCTraceTime() {
   }
 }
 
-GCTraceTime::getCurrentTime() {
+long GCTraceTime::getCurrentTime() {
     struct timeval tv;
     gettimeofday(&tv,NULL);
     return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
 
-GCTraceTime::printf_format_time(const char* title, long start_time, long cost_time) {
+void GCTraceTime::printf_format_time(const char* title, long start_time, long cost_time) {
     char tmp[64];
     time_t start_time_secs = start_time / 1000; // millisecond to second
     strftime(tmp,sizeof(tmp),"start time %Y-%m-%d %X",localtime(&start_time_secs));
