@@ -102,5 +102,5 @@ void GCTraceTime::printf_format_time(const char* title, long start_time, long co
     strftime(time_format_str, sizeof(time_format_str), "%Y-%m-%d %X", localtime(&start_time_secs));
 
     // print as a json string
-    printf("{\"happened_time\":\"%s\", \"method\":\"%s\", \"time\":\"%ld\", \"time_unit\":\"milliseconds\"}\n", time_format_str, title, cost_time);
+    printf("{\"happened_time\":\"%s\", \"method\":\"%s\", \"time\":\"%ld\", \"time_unit\":\"milliseconds\"},\n", time_format_str, title, cost_time);
 }
