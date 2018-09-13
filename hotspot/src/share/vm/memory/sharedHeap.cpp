@@ -161,29 +161,53 @@ void SharedHeap::process_strong_roots(bool activate_scope,
   // could be trying to change the termination condition while the task
   // is executing in another GC worker.
   if (!_process_strong_tasks->is_task_claimed(SH_PS_Universe_oops_do)) {
+    long start = GCTraceTime::getCurrentTime();
     Universe::oops_do(roots);
+    GCTraceTime::printf_format_time("Universe::oops_do", start, GCTraceTime::getCurrentTime() - start);
+
     // Consider perm-gen discovered lists to be strong.
+    start = GCTraceTime::getCurrentTime();
     perm_gen()->ref_processor()->weak_oops_do(roots);
+    GCTraceTime::printf_format_time("perm_gen()->ref_processor()->weak_oops_do", start, GCTraceTime::getCurrentTime() - start);
   }
   // Global (strong) JNI handles
-  if (!_process_strong_tasks->is_task_claimed(SH_PS_JNIHandles_oops_do))
+  if (!_process_strong_tasks->is_task_claimed(SH_PS_JNIHandles_oops_do)) {
+    long start = GCTraceTime::getCurrentTime();
     JNIHandles::oops_do(roots);
+    GCTraceTime::printf_format_time("JNIHandles::oops_do", start, GCTraceTime::getCurrentTime() - start);
+  }
 
   // All threads execute this; the individual threads are task groups.
   if (CollectedHeap::use_parallel_gc_threads()) {
+    long start = GCTraceTime::getCurrentTime();
     Threads::possibly_parallel_oops_do(roots, code_roots);
+    GCTraceTime::printf_format_time("Threads::possibly_parallel_oops_do", start, GCTraceTime::getCurrentTime() - start);
   } else {
+    long start = GCTraceTime::getCurrentTime();
     Threads::oops_do(roots, code_roots);
+    GCTraceTime::printf_format_time("Threads::oops_do", start, GCTraceTime::getCurrentTime() - start);
   }
 
-  if (!_process_strong_tasks-> is_task_claimed(SH_PS_ObjectSynchronizer_oops_do))
+  if (!_process_strong_tasks-> is_task_claimed(SH_PS_ObjectSynchronizer_oops_do)) {
+    long start = GCTraceTime::getCurrentTime();
     ObjectSynchronizer::oops_do(roots);
-  if (!_process_strong_tasks->is_task_claimed(SH_PS_FlatProfiler_oops_do))
+    GCTraceTime::printf_format_time("ObjectSynchronizer::oops_do", start, GCTraceTime::getCurrentTime() - start);
+  }
+  if (!_process_strong_tasks->is_task_claimed(SH_PS_FlatProfiler_oops_do)) {
+    long start = GCTraceTime::getCurrentTime();
     FlatProfiler::oops_do(roots);
-  if (!_process_strong_tasks->is_task_claimed(SH_PS_Management_oops_do))
+    GCTraceTime::printf_format_time("FlatProfiler::oops_do", start, GCTraceTime::getCurrentTime() - start);
+  }
+  if (!_process_strong_tasks->is_task_claimed(SH_PS_Management_oops_do)) {
+    long start = GCTraceTime::getCurrentTime();
     Management::oops_do(roots);
-  if (!_process_strong_tasks->is_task_claimed(SH_PS_jvmti_oops_do))
+    GCTraceTime::printf_format_time("Management::oops_do", start, GCTraceTime::getCurrentTime() - start);
+  }
+  if (!_process_strong_tasks->is_task_claimed(SH_PS_jvmti_oops_do)) {
+    long start = GCTraceTime::getCurrentTime();
     JvmtiExport::oops_do(roots);
+    GCTraceTime::printf_format_time("JvmtiExport::oops_do", start, GCTraceTime::getCurrentTime() - start);
+  }
 
   if (!_process_strong_tasks->is_task_claimed(SH_PS_SystemDictionary_oops_do)) {
     if (so & SO_AllClasses) {
@@ -223,9 +247,13 @@ void SharedHeap::process_strong_roots(bool activate_scope,
   if (JavaObjectsInPerm) {
     // Verify the string table contents are in the perm gen
     if (CollectedHeap::use_parallel_gc_threads()) {
+      long start = GCTraceTime::getCurrentTime();
       NOT_PRODUCT(StringTable::possibly_parallel_oops_do(&assert_is_perm_closure));
+      GCTraceTime::printf_format_time("NOT_PRODUCT(StringTable::possibly_parallel_oops_do", start, GCTraceTime::getCurrentTime() - start);
     } else {
+      long start = GCTraceTime::getCurrentTime();
       NOT_PRODUCT(StringTable::oops_do(&assert_is_perm_closure));
+      GCTraceTime::printf_format_time("NOT_PRODUCT(StringTable::oops_do", start, GCTraceTime::getCurrentTime() - start);
     }
   }
 
@@ -235,7 +263,9 @@ void SharedHeap::process_strong_roots(bool activate_scope,
       assert(collecting_perm_gen, "scanning all of code cache");
       assert(code_roots != NULL, "must supply closure for code cache");
       if (code_roots != NULL) {
+        long start = GCTraceTime::getCurrentTime();
         CodeCache::blobs_do(code_roots);
+        GCTraceTime::printf_format_time("CodeCache::blobs_do", start, GCTraceTime::getCurrentTime() - start);
       }
     } else if (so & (SO_SystemClasses|SO_AllClasses)) {
       if (!manages_code_roots && !collecting_perm_gen) {
@@ -247,7 +277,9 @@ void SharedHeap::process_strong_roots(bool activate_scope,
         // If collecting_perm_gen is true, we require that this phase will call
         // CodeCache::do_unloading.  This will kill off nmethods with expired
         // weak references, such as stale invokedynamic targets.
+        long start = GCTraceTime::getCurrentTime();
         CodeCache::scavenge_root_nmethods_do(code_roots);
+        GCTraceTime::printf_format_time("CodeCache::scavenge_root_nmethods_do", start, GCTraceTime::getCurrentTime() - start);
       }
     }
     // Verify that the code cache contents are not subject to
@@ -258,10 +290,15 @@ void SharedHeap::process_strong_roots(bool activate_scope,
 
   if (!collecting_perm_gen) {
     // All threads perform this; coordination is handled internally.
+    long start = GCTraceTime::getCurrentTime();
 
     rem_set()->younger_refs_iterate(perm_gen(), perm_blk);
+    GCTraceTime::printf_format_time("rem_set()->younger_refs_iterate", start, GCTraceTime::getCurrentTime() - start);
   }
+
+  long start = GCTraceTime::getCurrentTime();
   _process_strong_tasks->all_tasks_completed();
+  GCTraceTime::printf_format_time("_process_strong_tasks->all_tasks_completed", start, GCTraceTime::getCurrentTime() - start);
 }
 
 class AlwaysTrueClosure: public BoolObjectClosure {
