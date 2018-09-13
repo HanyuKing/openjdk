@@ -97,8 +97,10 @@ long GCTraceTime::getCurrentTime() {
 }
 
 void GCTraceTime::printf_format_time(const char* title, long start_time, long cost_time) {
-    char tmp[64];
+    char time_format_str[64];
     time_t start_time_secs = start_time / 1000; // millisecond to second
-    strftime(tmp,sizeof(tmp),"start time %Y-%m-%d %X",localtime(&start_time_secs));
-    printf("%s[start time: %s, cost time: %ld]\n", title, tmp, cost_time);
+    strftime(tmp,sizeof(time_format_str),"start time %Y-%m-%d %X",localtime(&start_time_secs));
+
+    // print as a json string
+    printf("{\"happened_time\":\"%s\", \"method\":\"%s\", \"time\":\"%ld\", \"time_unit\":\"milliseconds\"}\n", time_format_str, title, cost_time);
 }
